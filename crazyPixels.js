@@ -280,7 +280,7 @@ crazyPixels = {
 			crazyPixels.config.shadowArray = true;
 			crazyPixels.config.scrandomize = true;
 			crazyPixels.config.randScrand = true;
-		} else if (i == 2) {
+		} else if (i == 1) {
 			crazyPixels.config.selfCount = 0;
 			crazyPixels.config.otherCount = 2;
 
