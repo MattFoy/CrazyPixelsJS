@@ -6,6 +6,7 @@ crazyPixels = {
 
 	canvas: null,
 	iteration: 0,
+	interval_id: null,
 
 	colorEnum: {
 		RED: 1,
@@ -39,7 +40,10 @@ crazyPixels = {
 			y_min: 0,
 			y_max: 50,
 			d_y: 1
-		}
+		},
+
+		interval: 30,
+		skipFrames: true
 	},
 
 	init: function(canvasName) {
@@ -72,7 +76,7 @@ crazyPixels = {
 	},
 
 	paint: function() {
-		if (crazyPixels.canvas.getContext) {
+		if (crazyPixels.canvas.getContext && (!crazyPixels.config.skipFrames || crazyPixels.iteration % 2 == 0)) {
 			var context = crazyPixels.canvas.getContext("2d")
 			context.clearRect(0, 0, canvas.width, canvas.height);
 			for (var x = 0; x < crazyPixels.array.length; x++) {
@@ -133,9 +137,7 @@ crazyPixels = {
 				
 				// count missed edges as random "others"
 				if (exceptionCount > 0 && crazyPixels.config.edgeNoise) {
-					for(var i = 0; i < exceptionCount; i++) {
-						tally[Math.floor(Math.random() * (3)) + 1] += crazyPixels.config.otherCount;
-					}
+					tally[Math.floor(Math.random() * (3)) + 1] += crazyPixels.config.otherCount * exceptionCount;					
 				}
 
 				if (crazyPixels.config.chaosFactor) {
@@ -256,43 +258,23 @@ crazyPixels = {
 	},
 
 	start_animation: function() {
-		crazyPixels.interval_id = window.setInterval(function() {
-			crazyPixels.transform();
-			crazyPixels.paint();
-		}, 50);
+		if (!crazyPixels.interval_id) {
+			crazyPixels.interval_id = window.setInterval(function() {
+				crazyPixels.transform();
+				crazyPixels.paint();
+			}, crazyPixels.config.interval);
+		}
 	},
 
 	stop_animation: function() {
-		window.clearInterval(crazyPixels.interval_id);
+		if (crazyPixels.interval_id) {
+			window.clearInterval(crazyPixels.interval_id);
+			crazyPixels.interval_id = null;
+		}
 	},
 
-	config_preset: function(i) {
-		if (i == 0) {
-			crazyPixels.config.selfCount = -1;
-			crazyPixels.config.otherCount = 1;
-
-			crazyPixels.config.chaosFactor = 3.5;
-			crazyPixels.config.edgeNoise = true;
-
-			crazyPixels.config.addToMin = 5;
-			crazyPixels.config.subtractFromMax = 5;
-
-			crazyPixels.config.shadowArray = true;
-			crazyPixels.config.scrandomize = true;
-			crazyPixels.config.randScrand = true;
-		} else if (i == 1) {
-			crazyPixels.config.selfCount = 0;
-			crazyPixels.config.otherCount = 2;
-
-			crazyPixels.config.chaosFactor = 4;
-			crazyPixels.config.edgeNoise = true;
-
-			crazyPixels.config.addToMin = 4;
-			crazyPixels.config.subtractFromMax = 4;
-
-			crazyPixels.config.shadowArray = false;
-			crazyPixels.config.scrandomize = false;
-			crazyPixels.config.randScrand = false;
-		}
+	restart_animation: function() {
+		crazyPixels.stop_animation();
+		crazyPixels.init(crazyPixels.canvas.id);
 	}
 }
